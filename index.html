@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>The test canvas & mouse</title>
+
+<script>
+            function initialise()
+            {
+                var canvas=document.getElementById("canvas_1");
+                canvas.addEventListener("mousedown", lkm, false);
+            }
+            function lkm(event)
+            {
+                can
+            }
+            </script>
+</head>
+
+<body>
+
+	<canvas id="myCanvas" width="256" height="256" style="border: 1px solid #d3d3d3;">
+		Your browser does not support the HTML5 canvas tag.
+	</canvas>
+
+	<script>
+		var c = document.getElementById("myCanvas");
+		var ctx = c.getContext("2d");
+		ctx.moveTo(0, 0);
+		ctx.lineTo(200, 100);
+		ctx.stroke();
+	</script>
+
+</body>
+</html>
