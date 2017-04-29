@@ -3,20 +3,20 @@
 
 //------------------------------------------------------------------------------
 
-int hashing(const char t[6][8])
+int hashing(const char r[6][8])
 {
 	int hash=0;
 	int sum=0;
 	for (int n=0;n<6;++n)
 	{
-		if(t[n][1] == n) sum++;
-		if(t[n][7] == n) sum++;
-		if(t[n][3] == n) sum++;
-		if(t[n][5] == n) sum++;
+		if(r[n][1] == n) sum++;
+		if(r[n][7] == n) sum++;
+		if(r[n][3] == n) sum++;
+		if(r[n][5] == n) sum++;
 		
 		for (int m=0;m<8;++m)
 		{
-			hash ^= (t[n][m])<<(n+m);
+			hash ^= (r[n][m])<<(n+m);
 		}
 	}
 	return (((0x18&sum)<<11) | hash);
@@ -163,28 +163,37 @@ bool turn(const int q, char r[6][8])
 
 //------------------------------------------------------------------------------
 
-void init(char t[6][8])
+void init(char r[6][8])
 {
 	for (int n=0;n<6;++n)
 		for (int m=0;m<8;++m)
-			t[n][m] = n;
+			r[n][m] = n;
+	return;
 }
 
 //------------------------------------------------------------------------------
 
-void print(const char t[6][8])
+void print(const char r[6][8])
 {
 	printf("\n");
 	for (int n=0;n<6;++n)
 	{
 		for (int m=0;m<8;++m)
-			printf("%d",t[n][m]);
+			printf("%d",r[n][m]);
 		if (5!=n) printf(" : ");
 	}
+	return;
 }
 
 //------------------------------------------------------------------------------
 
+void solve(char r[6][8])
+{
+
+	return;
+}
+
+//------------------------------------------------------------------------------
 
 int main()
 {
