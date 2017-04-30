@@ -205,14 +205,19 @@ unsigned power(const unsigned a,const unsigned p)
 
 //------------------------------------------------------------------------------
 
-void pack(const char r[6][8], unsigned short a[6], unsigned int b[6])
+void pack(const char r[6][8], unsigned short a[6], unsigned b[6])
 {
 	for (unsigned n=0;n<6;++n)
 	{
 		unsigned val=0; 
 		for (unsigned m=0;m<8;++m)
 			val+=r[n][m]*power(6,m);
-		a[]
+		printf("\n%u : %u",n,val);
+		if(val>1679616) exit(1);	
+		a[n]=0xffff&val;
+		printf(" ; %u",a[n]);
+		b[n]=1<<((0x1f0000&val)>>16)
+		printf(" ; %u",b[n]);
 	}
 }
 
@@ -251,8 +256,14 @@ int main()
 		const unsigned short hash=hashing(s);
 		hashes[hash]++;
 		//printf("   %d   %d",hashes[hash],hash);
+		
+		unsigned short a[6]={0,};
+		unsigned b[6]={0,};
+		pack(s,a,b);
+		
 	}
 	printf("\n");
+	/*
 	for (unsigned n=0;n<65536;++n)
 	{
 		printf("%d:%d",n,hashes[n]);
@@ -261,8 +272,10 @@ int main()
 		else
 	 		printf(" ");
 	}
+	*/
 	printf("\n");
 	return 0;
 }
 
 //------------------------------------------------------------------------------
+
