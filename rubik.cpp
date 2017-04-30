@@ -2,11 +2,11 @@
 #include <random>
 #include <cmath>
 #include <string>
+#include <cstring>
 #include <stdexcept>
 #include <cassert>
 
 
-#define PACKAGES 128
 //------------------------------------------------------------------------------
 int sum(const char r[6][8])
 {
@@ -276,6 +276,7 @@ bool exists(const unsigned p[4], unsigned short hashes[65536],unsigned *packs[65
 	if(hashes[hash]==0)
 	{
 		hashes[hash]=1;
+		packs[hash]=new unsigned[4];
 		place(p,0,packs[hash]);
 		printf(" first added %4x",hash);		
 	}
@@ -288,14 +289,15 @@ bool exists(const unsigned p[4], unsigned short hashes[65536],unsigned *packs[65
 		}
 		else
 		{
-			if(hashes[hash]<PACKAGES)
-			{
-				place(p,hashes[hash],packs[hash]);		
-				hashes[hash]++;
-				printf(" added %4x N=%d",hash,hashes[hash]);
-			}
-			else 
-				throw std::domain_error("limit packs");
+			const unsigned packNumber=hashes[hash];
+			unsigned *newPacks;
+			newPacks=new unsigned [4*(packNumber+1)];
+			memcpy(newPacks,packs,4*packNumber);
+			delete [] packs[hash];
+			packs[hash]=newPacks;
+			place(p,packNumber,packs[hash]);		
+			hashes[hash]++;
+			printf(" added %4x N=%d",hash,hashes[hash]);
 		}
 	}
 	return false;
@@ -312,9 +314,7 @@ int main()
 	
 	char s[6][8];
 	unsigned short hashes[65536]={0,};
-	unsigned *packs[65536];	
-	for(unsigned n=0;n<65536;++n)
-		packs[n]=new unsigned[4*PACKAGES];
+	unsigned *packs[65536]={nullptr,};	
 	
 	init(s);
 	//print(s);
@@ -365,7 +365,8 @@ int main()
 	
 	
 	for(unsigned n=0;n<65536;++n)
-		delete [] packs[n];
+		if(nullptr!=packs[n])
+			delete [] packs[n];
 	return 0;
 }
 
