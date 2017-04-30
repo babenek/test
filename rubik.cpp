@@ -2,24 +2,31 @@
 #include <random>
 
 //------------------------------------------------------------------------------
+int sum(const char r[6][8])
+{
+	int sum=0;
+	for (unsigned n=0;n<6;++n)
+		for (unsigned m=0;m<8;++m)
+			sum+=r[n][m];
+	return sum;
+}
+
+//------------------------------------------------------------------------------
 
 int hashing(const char r[6][8])
 {
 	int hash=0;
 	int sum=0;
-	for (int n=0;n<6;++n)
+	for (unsigned n=0;n<6;++n)
 	{
-		if(r[n][1] == n) sum++;
-		if(r[n][7] == n) sum++;
-		if(r[n][3] == n) sum++;
-		if(r[n][5] == n) sum++;
-		
-		for (int m=0;m<8;++m)
+		for (unsigned m=0;m<8;++m)
 		{
 			hash ^= (r[n][m])<<(n+m);
+			if(r[n][m] == n) 
+				sum++;
 		}
 	}
-	return (((0x18&sum)<<11) | hash);
+	return ((0x03&sum) | (hash<<2));
 }
 
 //------------------------------------------------------------------------------
@@ -28,11 +35,11 @@ bool turn(const int q, char r[6][8])
 {
 	char t[6][8];	
 	
-	for (int n=0;n<6;++n)
+	for (unsigned n=0;n<6;++n)
 	{
 		if(q==n) 
 			continue; 
-		for (int m=0;m<8;++m)
+		for (unsigned m=0;m<8;++m)
 			t[n][m] = r[n][m];
 	}
 	
@@ -154,8 +161,8 @@ bool turn(const int q, char r[6][8])
 	
 	hashing(t);
 	
-	for (int n=0;n<6;++n)
-		for (int m=0;m<8;++m)
+	for (unsigned n=0;n<6;++n)
+		for (unsigned m=0;m<8;++m)
 			r[n][m] = t[n][m];
 	
 	return true;
@@ -165,8 +172,8 @@ bool turn(const int q, char r[6][8])
 
 void init(char r[6][8])
 {
-	for (int n=0;n<6;++n)
-		for (int m=0;m<8;++m)
+	for (unsigned n=0;n<6;++n)
+		for (unsigned m=0;m<8;++m)
 			r[n][m] = n;
 	return;
 }
@@ -176,13 +183,37 @@ void init(char r[6][8])
 void print(const char r[6][8])
 {
 	printf("\n");
-	for (int n=0;n<6;++n)
+	for (unsigned n=0;n<6;++n)
 	{
-		for (int m=0;m<8;++m)
+		for (unsigned m=0;m<8;++m) 
 			printf("%d",r[n][m]);
-		if (5!=n) printf(" : ");
+		if (5!=n) 
+			printf(" : ");
 	}
 	return;
+}
+
+//------------------------------------------------------------------------------
+
+unsigned power(const unsigned a,const unsigned p)
+{
+	unsigned res=1;
+	for (unsigned n=0;n<p;++n)
+		res*=a;
+	return res;
+}
+
+//------------------------------------------------------------------------------
+
+void pack(const char r[6][8], unsigned short a[6], unsigned int b[6])
+{
+	for (unsigned n=0;n<6;++n)
+	{
+		unsigned val=0; 
+		for (unsigned m=0;m<8;++m)
+			val+=r[n][m]*power(6,m);
+		a[]
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -198,17 +229,38 @@ void solve(char r[6][8])
 int main()
 {
 	std::srand(time(0));
+
+	//printf ("\n%d, %d, %d\n",power(1,0),power(6,8),power(2,31));
+	
 	
 	char s[6][8];
+	
+	int hashes[65536]={0,};
 
 	init(s);
 	print(s);
-	printf("   %d",hashing(s));
-	for(int n=0;n<5;++n){
+	const unsigned short initialHash=hashing(s);
+	hashes[initialHash]++;
+	printf("   %d",initialHash);
+	
+	for(int n=0;n<1000000;++n)
+	{
 		turn(std::rand()%6,s);
-		print(s);
-		printf("   %d",hashing(s));
-		}
+		//print(s);
+		if(120!=sum(s)) exit(EXIT_FAILURE);
+		const unsigned short hash=hashing(s);
+		hashes[hash]++;
+		//printf("   %d   %d",hashes[hash],hash);
+	}
+	printf("\n");
+	for (unsigned n=0;n<65536;++n)
+	{
+		printf("%d:%d",n,hashes[n]);
+		if (hashes[n]>0)
+			printf("\n");
+		else
+	 		printf(" ");
+	}
 	printf("\n");
 	return 0;
 }
