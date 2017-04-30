@@ -1,6 +1,12 @@
 #include <cstdio>
 #include <random>
+#include <cmath>
+#include <string>
+#include <stdexcept>
+#include <cassert>
 
+
+#define PACKAGES 128
 //------------------------------------------------------------------------------
 int sum(const char r[6][8])
 {
@@ -13,10 +19,17 @@ int sum(const char r[6][8])
 
 //------------------------------------------------------------------------------
 
-int hashing(const char r[6][8])
+unsigned short hashing(const unsigned r[4])
 {
-	int hash=0;
-	int sum=0;
+	const unsigned hash=r[0]^r[1]^r[2]^r[3];
+	return (hash^(hash>>16));
+}
+//------------------------------------------------------------------------------
+
+unsigned short hashing(const char r[6][8])
+{
+	unsigned hash=0;
+	unsigned sum=0;
 	for (unsigned n=0;n<6;++n)
 	{
 		for (unsigned m=0;m<8;++m)
@@ -170,6 +183,17 @@ bool turn(const int q, char r[6][8])
 
 //------------------------------------------------------------------------------
 
+bool check(const char r[6][8])
+{
+	bool res=true;
+	for (unsigned n=0;n<6 && res;++n)
+		for (unsigned m=0;m<8 && res;++m)
+			res = (n == r[n][m]);
+	return res;
+}
+
+//------------------------------------------------------------------------------
+
 void init(char r[6][8])
 {
 	for (unsigned n=0;n<6;++n)
@@ -195,30 +219,23 @@ void print(const char r[6][8])
 
 //------------------------------------------------------------------------------
 
-unsigned power(const unsigned a,const unsigned p)
+void pack(const char r[6][8], unsigned p[4])
 {
-	unsigned res=1;
-	for (unsigned n=0;n<p;++n)
-		res*=a;
-	return res;
-}
-
-//------------------------------------------------------------------------------
-
-void pack(const char r[6][8], unsigned short a[6], unsigned b[6])
-{
+	unsigned t[6]={0,};
 	for (unsigned n=0;n<6;++n)
 	{
-		unsigned val=0; 
 		for (unsigned m=0;m<8;++m)
-			val+=r[n][m]*power(6,m);
-		printf("\n%u : %u",n,val);
-		if(val>1679616) exit(1);	
-		a[n]=0xffff&val;
-		printf(" ; %u",a[n]);
-		b[n]=1<<((0x1f0000&val)>>16)
-		printf(" ; %u",b[n]);
+		{
+			static const unsigned po[8]={1, 6, 6*6, 6*6*6, 6*6*6*6, 6*6*6*6*6, 6*6*6*6*6*6, 6*6*6*6*6*6*6};
+
+			t[n]+=r[n][m]*po[m];	
+		}
+		//assert(t[n]<1679616);
 	}
+	p[0]=t[0] | (t[1]<<21);
+	p[1]=(t[1]>>11) | (t[2]<<11);
+	p[2]=t[3] | (t[4]<<21);
+	p[3]=(t[4]>>11) | (t[5]<<11);
 }
 
 //------------------------------------------------------------------------------
@@ -231,6 +248,61 @@ void solve(char r[6][8])
 
 //------------------------------------------------------------------------------
 
+void place(const unsigned p[4], const unsigned short m, unsigned *packs)
+{
+	for(unsigned n=0;n<4;++n)
+		*(packs+4*m+n)=p[n];
+}
+//------------------------------------------------------------------------------
+
+bool found(const unsigned p[4], const unsigned short s, const unsigned *packs)
+{
+	bool res;
+	for(unsigned m=0;m<s;++m)
+	{
+		res=true;
+		for(unsigned n=0;n<4 && res;++n)
+			res &= (p[n] == *(packs+4*m+n));
+		if (res)
+			break;
+	}		
+	return res;
+}
+//------------------------------------------------------------------------------
+
+bool exists(const unsigned p[4], unsigned short hashes[65536],unsigned *packs[65536])
+{
+	const unsigned hash=hashing(p);
+	if(hashes[hash]==0)
+	{
+		hashes[hash]=1;
+		place(p,0,packs[hash]);
+		printf(" first added %4x",hash);		
+	}
+	else
+	{
+		if(found(p,hashes[hash],packs[hash]))
+		{
+			printf(" duplicate %4x",hash);
+			return true;
+		}
+		else
+		{
+			if(hashes[hash]<PACKAGES)
+			{
+				place(p,hashes[hash],packs[hash]);		
+				hashes[hash]++;
+				printf(" added %4x N=%d",hash,hashes[hash]);
+			}
+			else 
+				throw std::domain_error("limit packs");
+		}
+	}
+	return false;
+}
+
+//------------------------------------------------------------------------------
+
 int main()
 {
 	std::srand(time(0));
@@ -239,41 +311,61 @@ int main()
 	
 	
 	char s[6][8];
+	unsigned short hashes[65536]={0,};
+	unsigned *packs[65536];	
+	for(unsigned n=0;n<65536;++n)
+		packs[n]=new unsigned[4*PACKAGES];
 	
-	int hashes[65536]={0,};
-
 	init(s);
-	print(s);
-	const unsigned short initialHash=hashing(s);
-	hashes[initialHash]++;
-	printf("   %d",initialHash);
+	//print(s);
+	//const unsigned short initialHash=hashing(s);
+	//hashes[initialHash]++;
+	//printf("   %d",initialHash);
 	
-	for(int n=0;n<1000000;++n)
+	for(int l=0;l<5555555;++l)
 	{
 		turn(std::rand()%6,s);
+		//turn(0,s);
 		//print(s);
-		if(120!=sum(s)) exit(EXIT_FAILURE);
-		const unsigned short hash=hashing(s);
-		hashes[hash]++;
+		//assert(120==sum(s));
+		//const unsigned short hash=hashing(s);
+		//hashes[hash]++;
 		//printf("   %d   %d",hashes[hash],hash);
 		
-		unsigned short a[6]={0,};
-		unsigned b[6]={0,};
-		pack(s,a,b);
+		unsigned p[4]={0,0,0,0};
+		pack(s,p);
+		printf("\n%9d : %8x, %8x, %8x, %8x",l,p[0],p[1],p[2],p[3]);
 		
-	}
-	printf("\n");
-	/*
-	for (unsigned n=0;n<65536;++n)
-	{
-		printf("%d:%d",n,hashes[n]);
-		if (hashes[n]>0)
+		if(exists(p,hashes,packs))
+		{
 			printf("\n");
-		else
-	 		printf(" ");
+		}
+		
+		if(check(s))
+		{
+			printf("\n   solved!");
+			break;
+		}
+			
 	}
-	*/
 	printf("\n");
+	
+/*	
+	unsigned long long S=0;
+	for (unsigned n=0;n<65536;++n)
+		S+=hashes[n];
+	const double V=S/65536.0;	
+	double sm=0;
+	for (unsigned n=0;n<65536;++n)
+		sm+=(V-hashes[n])*(V-hashes[n]);
+	const double v=sqrt(static_cast<double>(sm/65536.0));
+	printf("\naverage=%f, div=%f",V,v);
+*/	
+	printf("\n");
+	
+	
+	for(unsigned n=0;n<65536;++n)
+		delete [] packs[n];
 	return 0;
 }
 
