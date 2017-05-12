@@ -44,7 +44,7 @@ unsigned short hashing(const char r[6][8])
 
 //------------------------------------------------------------------------------
 
-bool turn(const int q, char r[6][8])
+void turn(const char q, char r[6][8])
 {
 	char t[6][8];	
 	
@@ -55,13 +55,13 @@ bool turn(const int q, char r[6][8])
 		for (unsigned m=0;m<8;++m)
 			t[n][m] = r[n][m];
 	}
-	
+
 	for(int n=0;n<8;++n)
 	{
-		t[q][n]=r[q][(n+6)%8];
+		t[0x7&q][n]=r[0x7&q][(n+6)%8];
 	}
-	
-	switch(q)
+
+	switch(0x7&q)
 	{
 	case 0:
 		t[1][0]=r[4][0];
@@ -80,7 +80,7 @@ bool turn(const int q, char r[6][8])
 		t[4][1]=r[3][1];
 		t[4][2]=r[3][2];
 	break;
-	
+
 	case 1:
 		t[0][0]=r[2][2];
 		t[0][1]=r[2][3];
@@ -98,7 +98,7 @@ bool turn(const int q, char r[6][8])
 		t[5][3]=r[4][7];
 		t[5][4]=r[4][0];
 	break;
-	
+
 	case 2:
 		t[0][2]=r[3][2];
 		t[0][3]=r[3][3];
@@ -116,7 +116,7 @@ bool turn(const int q, char r[6][8])
 		t[5][1]=r[1][7];
 		t[5][2]=r[1][0];
 	break;
-	
+
 	case 3:
 		t[0][4]=r[4][2];
 		t[0][5]=r[4][3];
@@ -134,7 +134,7 @@ bool turn(const int q, char r[6][8])
 		t[5][6]=r[2][6];
 		t[5][7]=r[2][7];
 	break;
-	
+
 	case 4:
 		t[0][0]=r[1][4];
 		t[0][6]=r[1][3];
@@ -152,7 +152,7 @@ bool turn(const int q, char r[6][8])
 		t[5][5]=r[3][7];
 		t[5][6]=r[3][0];
 	break;
-	
+
 	case 5:
 		t[1][4]=r[2][4];
 		t[1][5]=r[2][5];
@@ -172,13 +172,11 @@ bool turn(const int q, char r[6][8])
 	break;
 	}
 	
-	hashing(t);
-	
 	for (unsigned n=0;n<6;++n)
 		for (unsigned m=0;m<8;++m)
 			r[n][m] = t[n][m];
-	
-	return true;
+
+	return;
 }
 
 //------------------------------------------------------------------------------
@@ -226,24 +224,25 @@ void pack(const char r[6][8], unsigned p[4])
 	{
 		for (unsigned m=0;m<8;++m)
 		{
-			static const unsigned po[8]={1, 6, 6*6, 6*6*6, 6*6*6*6, 6*6*6*6*6, 6*6*6*6*6*6, 6*6*6*6*6*6*6};
-
-			t[n]+=r[n][m]*po[m];	
+			static const unsigned po[8]=
+				{ 1
+				, 6
+				, 6*6
+				, 6*6*6
+				, 6*6*6*6
+				, 6*6*6*6*6
+				, 6*6*6*6*6*6
+				, 6*6*6*6*6*6*6
+				};
+			t[n]+=(r[n][m]*po[m]);	
 		}
 		//assert(t[n]<1679616);
+		//assert(t[n]&0x001FFFFF == t[n]);
 	}
 	p[0]=t[0] | (t[1]<<21);
 	p[1]=(t[1]>>11) | (t[2]<<11);
 	p[2]=t[3] | (t[4]<<21);
 	p[3]=(t[4]>>11) | (t[5]<<11);
-}
-
-//------------------------------------------------------------------------------
-
-void solve(char r[6][8])
-{
-
-	return;
 }
 
 //------------------------------------------------------------------------------
@@ -278,13 +277,13 @@ bool exists(const unsigned p[4], unsigned short hashes[65536],unsigned *packs[65
 		hashes[hash]=1;
 		packs[hash]=new unsigned[4];
 		place(p,0,packs[hash]);
-		printf(" first added %4x",hash);		
+//		printf(" first added %4x",hash);		
 	}
 	else
 	{
 		if(found(p,hashes[hash],packs[hash]))
 		{
-			printf(" duplicate %4x",hash);
+//			printf(" duplicate %4x",hash);
 			return true;
 		}
 		else
@@ -297,10 +296,65 @@ bool exists(const unsigned p[4], unsigned short hashes[65536],unsigned *packs[65
 			packs[hash]=newPacks;
 			place(p,packNumber,packs[hash]);		
 			hashes[hash]++;
-			printf(" added %4x N=%d",hash,hashes[hash]);
+//			printf(" added %4x N=%d",hash,hashes[hash]);
 		}
 	}
 	return false;
+}
+
+//------------------------------------------------------------------------------
+
+void solve(char steps[30], const char step , const char r[6][8],unsigned short hashes[65536],unsigned *packs[65536])
+{
+	for (unsigned n = 0; n<6 && step>0 ; ++n)
+	{
+		char t[6][8];
+		for (unsigned x=0;x<6;++x)
+			for (unsigned y=0;y<8;++y)
+				t[x][y]=r[x][y];
+		
+		steps[step]=n;
+		turn(n,t);
+		unsigned p[4]={0,0,0,0};
+		pack(t,p);
+		
+		printf("\n step:%d, n:%d",step,n);
+		
+		if(check(t))
+		{
+			printf("\n FOUND : ");
+			for (unsigned l=0;l<=step;++l) 
+				printf(" %d ",steps[l]);
+			throw std::domain_error("found");
+		}
+		if(exists(p,hashes,packs)) 
+			return;
+		else
+			solve (steps,step-1,t,hashes,packs);
+	}
+}
+//------------------------------------------------------------------------------
+
+void solve(const char r[6][8])
+{
+	unsigned short hashes[65536]={0,};
+	unsigned *packs[65536]={nullptr,};	
+		
+	char steps[30]={'@',};
+		
+	try
+	{
+		solve(steps,29,r,hashes,packs);
+	}
+	catch(const std::exception & e)
+	{
+	}
+	
+	for(unsigned n=0;n<65536;++n)
+		if(nullptr!=packs[n])
+			delete [] packs[n];
+
+	return;
 }
 
 //------------------------------------------------------------------------------
@@ -313,43 +367,22 @@ int main()
 	
 	
 	char s[6][8];
-	unsigned short hashes[65536]={0,};
-	unsigned *packs[65536]={nullptr,};	
 	
 	init(s);
 	//print(s);
 	//const unsigned short initialHash=hashing(s);
 	//hashes[initialHash]++;
-	//printf("   %d",initialHash);
-	
-	for(int l=0;l<5555555;++l)
-	{
-		turn(std::rand()%6,s);
-		//turn(0,s);
-		//print(s);
-		//assert(120==sum(s));
-		//const unsigned short hash=hashing(s);
-		//hashes[hash]++;
-		//printf("   %d   %d",hashes[hash],hash);
-		
-		unsigned p[4]={0,0,0,0};
-		pack(s,p);
-		printf("\n%9d : %8x, %8x, %8x, %8x",l,p[0],p[1],p[2],p[3]);
-		
-		if(exists(p,hashes,packs))
-		{
-			printf("\n");
-		}
-		
-		if(check(s))
-		{
-			printf("\n   solved!");
-			break;
-		}
-			
-	}
 	printf("\n");
 	
+	for(int l=0;l<9;++l)
+	{
+		const unsigned surface=std::rand()%6;
+		printf("%d,",surface);
+		turn(surface,s);
+		//turn(0,s);
+	}
+	printf("\n");
+	solve(s);
 /*	
 	unsigned long long S=0;
 	for (unsigned n=0;n<65536;++n)
@@ -363,10 +396,6 @@ int main()
 */	
 	printf("\n");
 	
-	
-	for(unsigned n=0;n<65536;++n)
-		if(nullptr!=packs[n])
-			delete [] packs[n];
 	return 0;
 }
 
