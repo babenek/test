@@ -51,8 +51,11 @@ TRACE("pushed "<<lo[cod]<<" : "<<hi[cod]<<" : "<<cod<<" , "<<acc<<" , "<<bitacc)
 	{
 		const unsigned cod = digit_mask & acc;
 		out.push_back(lo[cod]);
-		out.push_back(hi[cod]);
-		TRACE("push_ "<<lo[cod]<<" : "<<hi[cod]<<" : "<<cod<<" , "<<acc<<" , "<<bitacc);
+		if(7<=bitacc)
+		{
+			out.push_back(hi[cod]);
+			TRACE("push_ "<<lo[cod]<<" : "<<hi[cod]<<" : "<<cod<<" , "<<acc<<" , "<<bitacc);
+		}
 	}
 	
 	return;
@@ -64,7 +67,8 @@ void decode(const std::string & in,std::vector<unsigned char> & out)
 {
 	out.clear();
 	out.reserve(char_bits*in.size()/digit_bits);
-
+	TRACE("\ndecode\n");
+	
 	unsigned acc=0;
 	int bitacc=0;
 	short lower=-1;
