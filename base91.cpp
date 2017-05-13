@@ -7,6 +7,7 @@
 #include <cassert>
 #include <iostream>
 
+#define TRACE(a) std::cout<<a<<std::endl;
 //------------------------------------------------------------------------------
 namespace base91
 {
@@ -21,38 +22,44 @@ char lo[digit_size]={'~',};
 
 unsigned short hilo[base][base]={0,};
 
+//------------------------------------------------------------------------------
+
 void encode(const std::vector<unsigned char> & in,std::string & out)
 {
 	out.clear();
 	out.reserve(digit_bits*in.size()/char_bits+2);
 	unsigned acc=0;
-	int bitacc=0;
+	unsigned bitacc=0;
 
 	for (auto & n:in)
 	{
-		acc <<= char_bits;
-		acc |= n;
+		acc |= n<<bitacc;
 		bitacc+=char_bits;
-		while(digit_bits>=bitacc)
+TRACE("added "<<static_cast<short>(n)<<" : "<<acc<<" , "<<bitacc);
+		while(digit_bits<=bitacc)
 		{
 			const unsigned cod = digit_mask & acc;
 			out.push_back(lo[cod]);
 			out.push_back(hi[cod]);
 			acc>>=digit_bits;
 			bitacc-=digit_bits;
+TRACE("pushed "<<lo[cod]<<" : "<<hi[cod]<<" : "<<cod<<" , "<<acc<<" , "<<bitacc);
 		}
 	}
 
-	if(0 < bitacc)
+	if(0 != bitacc)
 	{
 		const unsigned cod = digit_mask & acc;
 		out.push_back(lo[cod]);
-		if(bitacc>=7)
-			out.push_back(hi[cod]);
+		out.push_back(hi[cod]);
+		TRACE("push_ "<<lo[cod]<<" : "<<hi[cod]<<" : "<<cod<<" , "<<acc<<" , "<<bitacc);
 	}
 	
 	return;
 }
+
+//------------------------------------------------------------------------------
+
 void decode(const std::string & in,std::vector<unsigned char> & out)
 {
 	out.clear();
@@ -69,8 +76,7 @@ void decode(const std::string & in,std::vector<unsigned char> & out)
 			lower=n-'!';
 			continue;
 		}
-		acc<<=digit_bits;
-		acc|=hilo[n-'!'][lower];
+		acc|=hilo[n-'!'][lower]<<bitacc;
 		bitacc+=digit_bits;
 		lower=-1;
 		
@@ -99,6 +105,7 @@ void decode(const std::string & in,std::vector<unsigned char> & out)
 	return;
 }
 }
+
 //------------------------------------------------------------------------------
 
 int main()
@@ -114,8 +121,12 @@ int main()
 			lo=0;
 		}
 	}
-
-	std::vector<unsigned char> in{0,1,2,3,0,0,1,2,0};
+	
+	srand(time(nullptr));
+	std::vector<unsigned char> in;//{0,143,10,15};
+	const unsigned size=10;//rand()%15;
+	for (unsigned n=0;n<size;++n)
+		in.push_back(rand()%256);
 	std::string out;
 	base91::encode(in,out);
 	std::cout<<out<<std::endl;
@@ -123,16 +134,26 @@ int main()
 	std::vector<unsigned char> test;
 	base91::decode(out,test);
 
+	if(in.size() != test.size())
+	{
+		TRACE(in.size() <<"!="<< test.size());	
+		return EXIT_FAILURE;
+	}
 	
-	for(auto n:test)
-		std::cout<<":"<<(short)n;
-	std::cout<<out<<std::endl;
+	for (unsigned n=0;n<size;++n)
+	{
+		if(in[n]!=test[n])
+		{
+			TRACE(n<<" ! "<<static_cast<short>(in[n])<<" != "<< static_cast<short>(test[n]));
+		}
+		else
+		{
+		TRACE(n<<" : "<<static_cast<short>(in[n])<<" == "<< static_cast<short>(test[n]));
+		}
+	}
+	
 
-	for(auto n:in)
-		std::cout<<":"<<(short)n;
-	std::cout<<out<<std::endl;
-	
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
