@@ -7,7 +7,7 @@
 #include <cassert>
 #include <iostream>
 
-#define TRACE(a) std::cout<<a<<std::endl;
+#define TRACE(a) std::cout<<__LINE__<<"# "<<a<<std::endl;
 //------------------------------------------------------------------------------
 namespace base91
 {
@@ -86,21 +86,26 @@ void decode(const std::string & in,std::vector<unsigned char> & out)
 		
 		while(char_bits<=bitacc)
 		{
+			TRACE("push "<<static_cast<short>(0xFF & acc));
 			out.push_back(0xFF & acc);
 			acc>>=char_bits;
 			bitacc-=char_bits;
+			TRACE("remain "<<bitacc<<" "<<acc);
 		}
 	}
 	
 	if(-1!=lower)
 	{
-		acc<<=digit_bits;
-		acc|=hilo[0][lower];
+		TRACE(lower);
+		acc|=hilo[0][lower]<<bitacc;
+		TRACE(acc);
 		bitacc+=7;
+		TRACE("remain "<<bitacc);
 	}
 	
 	while(char_bits<=bitacc)
 	{
+		TRACE("push "<<static_cast<short>(0xFF & acc));
 		out.push_back(0xFF & acc);
 		acc>>=char_bits;
 		bitacc-=char_bits;
@@ -127,8 +132,10 @@ int main()
 	}
 	
 	srand(time(nullptr));
+for(int i=0;i<1000000;++i)
+{
 	std::vector<unsigned char> in;//{0,143,10,15};
-	const unsigned size=10;//rand()%15;
+	const unsigned size=rand()%15;
 	for (unsigned n=0;n<size;++n)
 		in.push_back(rand()%256);
 	std::string out;
@@ -149,13 +156,14 @@ int main()
 		if(in[n]!=test[n])
 		{
 			TRACE(n<<" ! "<<static_cast<short>(in[n])<<" != "<< static_cast<short>(test[n]));
+			return EXIT_FAILURE;
 		}
 		else
 		{
 		TRACE(n<<" : "<<static_cast<short>(in[n])<<" == "<< static_cast<short>(test[n]));
 		}
 	}
-	
+}	
 
 	return EXIT_SUCCESS;
 }
