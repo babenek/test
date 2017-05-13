@@ -11,8 +11,7 @@
 //------------------------------------------------------------------------------
 namespace base91
 {
-#define BASE91
-static const unsigned base=BASE91;
+static const unsigned base=91;
 static const unsigned char_bits=8;
 static const unsigned digit_bits=13;
 static const unsigned digit_size=0x2000;
@@ -66,15 +65,31 @@ const char decoder[256]=
 ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
-}
+};
 
-#define HI00(n) {\
-n*BASE91
-}
 
-char hilo[base][base]=
+const char hilo[base][base]=
 {
-DUP91({DUP91(__COUNTER)})
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},{DUP91(__COUNTER__)},
+{DUP91(__COUNTER__)}
+
 };
 
 //------------------------------------------------------------------------------
@@ -218,6 +233,7 @@ void decode(const std::string & in,std::vector<unsigned char> & out)
 //------------------------------------------------------------------------------
 int main()
 {
+/*
 	for(unsigned n=0, hi=0,lo=0;n<base91::digit_size;++n)
 	{
 		base91::lo[n]=getDigit(lo);
@@ -229,7 +245,7 @@ int main()
 			lo=0;
 		}
 	}
-	
+*/	
 	srand(time(nullptr));
 for(int i=0;i<1000000;++i)
 {
