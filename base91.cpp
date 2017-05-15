@@ -789,23 +789,26 @@ void decode(const std::string & in,std::vector<unsigned char> & out)
 	
 	unsigned acc=0;
 	int bitacc=0;
-	short lower=-1;
+	char lower=-1;
 	
 	for (auto & n:in)
 	{
+		const char digit=decoder[n];
+		if(-1==digit)
+			continue;
 		if(-1==lower)
 		{
-			lower=n-'!';
+			lower=digit;
 			continue;
 		}
-		acc|=hilo[n-'!'][lower]<<bitacc;
+		acc|=hilo[digit][lower]<<bitacc;
 		bitacc+=digit_bits;
 		lower=-1;
 		
 		while(char_bits<=bitacc)
 		{
 			TRACE("push "<<static_cast<short>(0xFF & acc));
-			out.push_back(0xFF & acc);
+			out.push_back(static_cast<char>(0xFF & acc));
 			acc>>=char_bits;
 			bitacc-=char_bits;
 			TRACE("remain "<<bitacc<<" "<<acc);
@@ -821,20 +824,22 @@ void decode(const std::string & in,std::vector<unsigned char> & out)
 		TRACE("remain "<<bitacc);
 	}
 	
-	while(char_bits<=bitacc)
+	if(char_bits<=bitacc)
 	{
 		TRACE("push "<<static_cast<short>(0xFF & acc));
-		out.push_back(0xFF & acc);
-		acc>>=char_bits;
-		bitacc-=char_bits;
+		out.push_back(static_cast<char>(0xFF & acc));
+		//acc>>=char_bits;
+		//bitacc-=char_bits;
 	}
 	
 	return;
 }
+
 }//namespace base91
 //------------------------------------------------------------------------------
 int main()
 {
+/*
 	std::cout<<"{";
 
 	for(unsigned hi=0;hi<91;++hi)
@@ -852,7 +857,7 @@ int main()
 	}
 	std::cout<<"}\n";
 	return 0;
-
+*/
 	srand(time(nullptr));
 for(int i=0;i<1000000;++i)
 {
