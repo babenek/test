@@ -7,6 +7,7 @@
 
 class Eagle
 {
+public:
 	std::map<int, int> entries;
 	int exit;
 
@@ -18,17 +19,18 @@ class Eagle
 		{
 			if(0>prev)
 			{
-				prev = n->first;
+				prev = n.first;
 			}
 			else
 			{
-				if (prev<egg and egg<n->first)
+				if (prev<egg and egg<n.first)
 				{
-					std::cout<<"found:"<<n->first;
+					std::cout<<"found:"<<n.first;
 					break;
 				}
 			}
 		};
+		return  0;
 	}
 };
 
