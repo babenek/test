@@ -27,7 +27,7 @@ public:
                     break;
                 }
             }
-        };
+        }
         return 0;
     }
 };
@@ -39,4 +39,4 @@ main(void) {
     e.entries[5] = 0;
     e.findNest(3);
     return 0;
-};
+}
