@@ -3,5 +3,5 @@ project(test)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(test graf.cpp)
+add_executable(test graf.cpp hash.cpp quick_sort.cpp)
 

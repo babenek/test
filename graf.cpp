@@ -39,7 +39,7 @@ void solve(V *v)
 	}
 }
 
-int main(int argc, char *argv[])
+int main_graf(int argc, char *argv[])
 {
 	V v0(0, 1);
 	V v1(1, 1);
