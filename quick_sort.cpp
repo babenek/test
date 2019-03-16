@@ -56,16 +56,54 @@ void swap(T *a, T *b)
 
 
 template<typename T>
-void quick_sort(T *a, T *b)
+void qsort(T *a, T *b)
 {
-	swap(a, b);
-	return;
+	if (a >= b)
+	{
+		return;
+	}
+	if ((a + 1) == b)
+	{
+		if (*a > *b)
+			swap(a, b);
+		return;
+	}
+
+	T *A = a;
+	T *B = b;
+	const T *c = a + ((b - a) >> 1);
+	T P = *c;
+
+	//const T S = A / 3 + B / 3 + P / 3; todo: may be used precalc statistic...
+
+	do
+	{
+		while (*a < P)
+			++a;
+
+		while (*b > P)
+			--b;
+
+		if (a < b)
+		{
+			swap(a, b);
+			++a;
+			--b;
+		}
+	}
+	while (a < b);
+
+
+	if (A < b)
+		qsort(A, b);
+	if (a < B)
+		qsort(a, B);
 }
 
 int main()
 {
 
-	const unsigned lim = 5;
+	const unsigned lim = 1 << 22;
 
 	typedef unsigned short T;
 	T *V = new T[lim];//= {5, 7, 3};
@@ -76,10 +114,10 @@ int main()
 
 
 	double S = 0;
-	long long stat[1000];
-	for (unsigned s = 0; s < 1000; ++s)
+	const unsigned stat_size = 100;
+	long long stat[stat_size];
+	for (unsigned s = 0; s < stat_size; ++s)
 	{
-
 
 		for (int n = 0; n < lim; ++n)
 		{
@@ -87,7 +125,7 @@ int main()
 		}
 		const T H = hash(V, b);
 
-		std::cout << H << std::endl;
+		//std::cout << H << std::endl;
 		//print(0, lim - 1, V);
 		if (test(V, b))
 		{
@@ -97,7 +135,7 @@ int main()
 
 
 		const auto start = std::chrono::system_clock::now();
-		quick_sort(a, b);
+		qsort(a, b);
 		const auto duration = std::chrono::system_clock::now() - start;
 		if (not verify(a, b, H))
 		{
@@ -107,7 +145,7 @@ int main()
 		if (not test(a, b))
 		{
 			std::cout << "FAIL sort" << std::endl;
-			//print(a, b);
+			print(a, b);
 			return 1;
 		}
 		stat[s] = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -115,17 +153,17 @@ int main()
 		S += stat[s];
 	}
 
-	S /= 1000.0;
+	S /= (1.0 * stat_size);
 	std::cout << " AVG=" << S << std::endl;
 
 
 	double Z = 0;
-	for (unsigned s = 0; s < 1000; ++s)
+	for (unsigned s = 0; s < stat_size; ++s)
 	{
 		const double t = (stat[s] - S);
 		Z += (t * t);
 	}
-	std::cout << " SIGM=" << sqrt(Z / 1000.0) << std::endl;
+	std::cout << " SIGM=" << sqrt(Z / (1.0 * stat_size)) << std::endl;
 
 	delete[]V;
 	return 0;
