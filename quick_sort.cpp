@@ -7,167 +7,126 @@
 #include <iostream>
 
 
-void print(const int a, const int b, long long v[])
+template<typename T>
+void print(const T *a, const T *b)
 {
-//	for (int n = a; n <= b; ++n)
-//	{
-//		std::cout << n << ":" << v[n] << std::endl;
-//	}
+	for (const T *n = a; n != b; ++n)
+	{
+		std::cout << n << ":" << *n << std::endl;
+	}
+	std::cout << b << ":" << *b << std::endl;
 }
 
-
-long long hash(const int a, const int b, long long v[])
+template<typename T>
+T hash(const T *a, const T *b)
 {
-	long long H = v[b];
-	for (int n = a; n < b; ++n)
+	T H = *b;
+	for (const T *n = a; n != b; ++n)
 	{
-		H ^= v[n];
+		H ^= *n;
 	}
 	return H;
 }
 
-const char *test(const int a, const int b, long long v[], const long long h)
+template<typename T>
+bool verify(const T *a, const T *b, const T h)
 {
-	static const char *pass = "PASS";
-	static const char *fail = "FAIL";
+	return (h == hash(a, b));
+}
 
-	if (h == hash(a, b, v))
+
+template<typename T>
+bool test(const T *a, const T *b)
+{
+	for (const T *n = a; n != b; ++n)
 	{
-		for (int n = a; n < b; ++n)
-		{
-			if (v[n] > v[n + 1])
-				return fail;
-		}
-		return pass;
+		if (*n > *(n + 1))
+			return false;
 	}
-
-	return fail;
+	return true;
 }
 
-void swap(const int a, const int b, long long v[])
+template<typename T>
+void swap(T *a, T *b)
 {
-	const long long t = v[a];
-	v[a] = v[b];
-	v[b] = t;
+	const T t = *a;
+	*a = *b;
+	*b = t;
 }
 
-void bubble_sort(const int a, const int b, long long v[])
+
+template<typename T>
+void quick_sort(T *a, T *b)
 {
-	for (int n = a; n <= b; ++n)
-	{
-		int bubble_m = n;
-		long long bubble = v[n];
-		for (int m = n + 1; m <= b; ++m)
-		{
-			if (v[m] < bubble)
-			{
-				bubble = v[m];
-				bubble_m = m;
-			}
-		}
-		if (n != bubble_m)
-		{
-			swap(n, bubble_m, v);
-		}
-	}
+	swap(a, b);
+	return;
 }
-
-void oth_sort(const int a, const int b, long long v[])
-{
-	bool f = true;
-	while (f)
-	{
-		f = false;
-		for (int n = a; n < b; ++n)
-		{
-			if (v[n] > v[n + 1])
-			{
-				swap(n, n + 1, v);
-				f = true;
-			}
-		}
-	}
-}
-
-void quick_sort(const int A, const int B, long long v[])
-{
-	if (A >= B)
-		return;
-	long long p = v[(A + (B - 1))>>1];
-
-	int a = A;
-	int b = B;
-	do
-	{
-		while (v[a] < p)
-			++a;
-
-		while (v[b] > p)
-			--b;
-
-		if (v[a] > v[b])
-		{
-			swap(a, b, v);
-			//			++a;
-		}
-	}
-	while (a < b);
-
-	quick_sort(A, a, v);
-
-	quick_sort(a + 1, B, v);
-
-}
-
 
 int main()
 {
-	const int lim = 1 << 19;
-	long long quick[lim];
-//	long long bubble[lim];
-//	long long change[lim];
-//	long long oth[lim];
 
-	long long H = 0;
+	const unsigned lim = 5;
+
+	typedef unsigned short T;
+	T *V = new T[lim];//= {5, 7, 3};
+	T *a = V;
+	T *b = V + lim - 1;
+
 	std::mt19937_64 generator(time(0));
+
+
+	double S = 0;
+	long long stat[1000];
+	for (unsigned s = 0; s < 1000; ++s)
 	{
-		const auto start = std::chrono::system_clock::now();
+
+
 		for (int n = 0; n < lim; ++n)
 		{
-			//oth[n] = change[n] = bubble[n] =
-			quick[n] = generator();
+			V[n] = generator();
 		}
-		H = hash(0, lim - 1, quick);
-		const auto duration = std::chrono::system_clock::now() - start;
-		std::cout << test(0, lim - 1, quick, H) << " filled:"
-				  << std::chrono::duration_cast<std::chrono::milliseconds>(
-					  duration).count() << std::endl;
-		std::cout << "hash:" << H << std::endl;
-	}
-	//	print(0, lim - 1, bubble);
-	//	{
-	//		const auto start = std::chrono::system_clock::now();
-	//		bubble_sort(0, lim - 1, bubble);
-	//		const auto duration = std::chrono::system_clock::now() - start;;
-	//		std::cout << test(0, lim - 1, bubble, H) << " bubble:"
-	//				  << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() << std::endl;
-	//	}
-	//	{
-	//		const auto start = std::chrono::system_clock::now();
-	//		oth_sort(0, lim - 1, oth);
-	//		const auto duration = std::chrono::system_clock::now() - start;;
-	//		std::cout << test(0, lim - 1, oth, H) << " oth:"
-	//				  << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() << std::endl;
-	//	}
-	{
-		const auto start = std::chrono::system_clock::now();
-		quick_sort(0, lim - 1, quick);
-		const auto duration = std::chrono::system_clock::now() - start;;
-		std::cout << test(0, lim - 1, quick, H) << " quick:"
-				  << std::chrono::duration_cast<std::chrono::milliseconds>(
-					  duration).count() << std::endl;
-	}
-	print(0, lim - 1, quick);
+		const T H = hash(V, b);
 
+		std::cout << H << std::endl;
+		//print(0, lim - 1, V);
+		if (test(V, b))
+		{
+			//std::cout << "sorted?!?!?!" << std::endl;
+			continue;
+		}
+
+
+		const auto start = std::chrono::system_clock::now();
+		quick_sort(a, b);
+		const auto duration = std::chrono::system_clock::now() - start;
+		if (not verify(a, b, H))
+		{
+			std::cout << "FAIL array" << std::endl;
+			return 1;
+		}
+		if (not test(a, b))
+		{
+			std::cout << "FAIL sort" << std::endl;
+			//print(a, b);
+			return 1;
+		}
+		stat[s] = std::chrono::duration_cast<std::chrono::milliseconds>(
+			duration).count();
+		S += stat[s];
+	}
+
+	S /= 1000.0;
+	std::cout << " AVG=" << S << std::endl;
+
+
+	double Z = 0;
+	for (unsigned s = 0; s < 1000; ++s)
+	{
+		const double t = (stat[s] - S);
+		Z += (t * t);
+	}
+	std::cout << " SIGM=" << sqrt(Z / 1000.0) << std::endl;
+
+	delete[]V;
 	return 0;
 }
