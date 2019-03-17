@@ -69,19 +69,62 @@ void qsort(T *a, T *b)
 		return;
 	}
 
-	T *A = a;
-	T *B = b;
-	const T *c = a + ((b - a) >> 1);
-	T P = *c;
+	T *aa = a;
+	T *bb = b;
+	T *cc = (a + ((b - a) >> 1));
+	T C = *cc;
+	/*
+	 on:
+	 AVG=3383.79
+	 SIGM=139.975
+	off
+	  AVG=3300.23
+	 SIGM=20.2004
 
-	//const T S = A / 3 + B / 3 + P / 3; todo: may be used precalc statistic...
+	 */
+#if 0
+	const T A = *aa;
+	const T B = *bb;
+	const T S = (A >> 1) + (((B >> 1) + (C >> 1)) >> 1);
+	//todo: may be used precalc statistic...
+	T dSA = 0;
+	T dSB = 0;
+	T dSC = 0;
+
+	if (S > A)
+		dSA = S - A;
+	else
+		dSA = A - S;
+	if (S > B)
+		dSB = S - B;
+	else
+		dSB = B - S;
+	if (S > C)
+		dSC = S - C;
+	else
+		dSC = C - S;
+
+	if (dSA < dSC or dSB < dSC)
+	{
+		if (dSA < dSB)
+		{
+			C = A;
+			swap(aa, cc);
+		}
+		else
+		{
+			C = B;
+			swap(bb, cc);
+		}
+	}
+#endif
 
 	do
 	{
-		while (*a < P)
+		while (*a < C)
 			++a;
 
-		while (*b > P)
+		while (*b > C)
 			--b;
 
 		if (a < b)
@@ -94,23 +137,23 @@ void qsort(T *a, T *b)
 	while (a < b);
 
 
-	if (A < b)
-		qsort(A, b);
-	if (a < B)
-		qsort(a, B);
+	if (aa < b)
+		qsort(aa, b);
+	if (a < bb)
+		qsort(a, bb);
 }
 
 int main()
 {
 
-	const unsigned lim = 1 << 22;
+	const unsigned lim = 1 << 24;
 
-	typedef unsigned short T;
+	typedef unsigned T;
 	T *V = new T[lim];//= {5, 7, 3};
 	T *a = V;
 	T *b = V + lim - 1;
 
-	std::mt19937_64 generator(time(0));
+	std::mt19937_64 generator(time(nullptr));
 
 
 	double S = 0;
