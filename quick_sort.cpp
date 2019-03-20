@@ -5,6 +5,10 @@
 #include <chrono>
 #include <random>
 #include <iostream>
+#include <cassert>
+
+static size_t rec=0;
+static size_t maxrec=0;
 
 
 template<typename T>
@@ -58,14 +62,22 @@ void swap(T *a, T *b)
 template<typename T>
 void qsort(T *a, T *b)
 {
+	rec++;
 	if (a >= b)
 	{
+		if(rec>maxrec)
+			maxrec=rec;
+		rec--;
 		return;
 	}
 	if ((a + 1) == b)
 	{
 		if (*a > *b)
 			swap(a, b);
+
+		if(rec>maxrec)
+			maxrec=rec;
+		rec--;
 		return;
 	}
 
@@ -82,7 +94,7 @@ void qsort(T *a, T *b)
 	 SIGM=20.2004
 
 	 */
-#if 0
+#if 1
 	const T A = *aa;
 	const T B = *bb;
 	const T S = (A >> 1) + (((B >> 1) + (C >> 1)) >> 1);
@@ -136,19 +148,22 @@ void qsort(T *a, T *b)
 	}
 	while (a < b);
 
-
 	if (aa < b)
 		qsort(aa, b);
 	if (a < bb)
 		qsort(a, bb);
+
+	if(rec>maxrec)
+		maxrec=rec;
+	rec--;
 }
 
 int main()
 {
 
-	const unsigned lim = 1 << 24;
+	const unsigned lim = 1 << 20;
 
-	typedef unsigned T;
+	typedef unsigned long long T;
 	T *V = new T[lim];//= {5, 7, 3};
 	T *a = V;
 	T *b = V + lim - 1;
@@ -207,6 +222,7 @@ int main()
 		Z += (t * t);
 	}
 	std::cout << " SIGM=" << sqrt(Z / (1.0 * stat_size)) << std::endl;
+	std::cout << " MAXREC=" << maxrec << std::endl;
 
 	delete[]V;
 	return 0;
