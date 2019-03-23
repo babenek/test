@@ -363,8 +363,19 @@ int main()
 {
 
 	const unsigned lim = 100000000;
+/*
+ size 100000000
+ unsigned long long
+ AVG=31536.8
+ SIGM=333.004
+ MAXREC=61
 
-	typedef unsigned long long T;
+ unsigned
+  AVG=30807.6
+ SIGM=286.245
+ MAXREC=60
+ */
+	typedef unsigned T;
 	T *V = new T[lim];//
 	const T W[lim] = {9, 8, 7, 6};
 	T *a = V;
