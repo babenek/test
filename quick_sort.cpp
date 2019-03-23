@@ -69,7 +69,7 @@ bool test(const T *a, const T *b)
 }
 
 template<typename T>
-void swap(T *a, T *b)
+inline void swap(T *a, T *b)
 {
 	//std::cout << "swap: " << a << " <-> " << b << std::endl;
 	const T t = *a;
@@ -78,14 +78,14 @@ void swap(T *a, T *b)
 }
 
 template<typename T>
-void sort(T *a, T *b)
+inline void sort(T *a, T *b)
 {
 	if (*b < *a)
 		swap(a, b);
 }
 
 template<typename T>
-void sort(T *a, T *b, T *c)
+inline void sort(T *a, T *b, T *c)
 {
 	T A = *a;
 	T B = *b;
@@ -368,14 +368,25 @@ void qsort3(T *aa, T *bb)
 template<typename T>
 void qsort2(T *a, T *b)
 {
+#if CALCULATE_RECURSION
+	rec++;
+	if (rec > maxrec)
+		maxrec = rec;
+#endif
 	if (not(a < b))
 	{
+#if CALCULATE_RECURSION
+		rec--;
+#endif
 		return;
 	}
 	if ((a + 1) == b)
 	{
 		if (*b < *a)
 			swap(a, b);
+#if CALCULATE_RECURSION
+		rec--;
+#endif
 		return;
 	}
 
@@ -383,8 +394,6 @@ void qsort2(T *a, T *b)
 	T *B = b;
 	const T *c = a + ((b - a) >> 1);
 	T P = *c;
-
-	//const T S = A / 3 + B / 3 + P / 3; todo: may be used precalc statistic...
 
 	do
 	{
@@ -408,6 +417,9 @@ void qsort2(T *a, T *b)
 		qsort2(A, b);
 	if (a < B)
 		qsort2(a, B);
+#if CALCULATE_RECURSION
+	rec--;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -415,20 +427,20 @@ void qsort2(T *a, T *b)
 int main()
 {
 
-	const unsigned lim = 100000;
+	const unsigned lim = 1000000;
 	/*
 
-	 10000000
+	10000000
 
 	unsigned
 
 	qs3
- 	AVG=2397.97
- 	SIGM=72.0195
+	AVG=2397.97
+	SIGM=72.0195
 
 	qs2
 	AVG=1825.08
- 	SIGM=14.4573
+	SIGM=14.4573
 
 
 	char
@@ -440,13 +452,30 @@ int main()
 	AVG=1196.53
 	SIGM=10.4244
 
-	 short
-	 qs2
- AVG=1502.58
- SIGM=10.5482
-	 qs3
- AVG=1485.86
- SIGM=23.222
+	short
+	qs2
+	AVG=1502.58
+	SIGM=10.5482
+	qs3
+	AVG=1485.86
+	SIGM=23.222
+
+	1000000
+	long long int
+	qs3
+	AVG=201.7
+	SIGM=2.52784
+	qs2
+	AVG=164.03
+	SIGM=2.44726
+
+	-O
+	qs3
+	AVG=108.32
+	SIGM=10.4727
+	qs2
+	AVG=74.94
+	SIGM=2.17633
 	*/
 	typedef long long int T;
 	T *V = new T[lim];//
@@ -484,7 +513,7 @@ int main()
 		rec = 0;
 #endif
 		const auto start = std::chrono::system_clock::now();
-		qsort2(a, b);
+		qsort3(a, b);
 		const auto duration = std::chrono::system_clock::now() - start;
 		if (not verify(a, b, H) or sm != sum(a, b))
 		{
