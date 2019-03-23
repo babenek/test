@@ -7,9 +7,11 @@
 #include <iostream>
 #include <cassert>
 
+#define CALCULATE_RECURSION (1)
+#if CALCULATE_RECURSION
 static size_t rec = 0;
 static size_t maxrec = 0;
-
+#endif
 
 template<typename T>
 void print(const T *a, const T *b)
@@ -30,6 +32,18 @@ T hash(const T *a, const T *b)
 		H ^= *n;
 	}
 	return H;
+}
+
+
+template<typename T>
+long long int sum(const T *a, const T *b)
+{
+	long long int S = *b;
+	for (const T *n = a; n != b; ++n)
+	{
+		S += *n;
+	}
+	return S;
 }
 
 template<typename T>
@@ -53,8 +67,7 @@ bool test(const T *a, const T *b)
 template<typename T>
 void swap(T *a, T *b)
 {
-
-	std::cout << "swap: " << a << " <-> " << b << std::endl;
+	//std::cout << "swap: " << a << " <-> " << b << std::endl;
 	const T t = *a;
 	*a = *b;
 	*b = t;
@@ -158,41 +171,38 @@ void sort(T *a, T *b, T *c)
 	}
 }
 
-#define RECURSION_CALC
 
 template<typename T>
-void qsort(T *aa, T *bb)
+void qsort3(T *aa, T *bb)
 {
 
-	std::cout << "sort: " << aa << " , " << bb << std::endl;
-#ifdef RECURSION_CALC
+#if CALCULATE_RECURSION
 	rec++;
+	if (rec > maxrec)
+		maxrec = rec;
 #endif
 	if (aa >= bb)
 	{
-#ifdef RECURSION_CALC
-		if (rec > maxrec)
-			maxrec = rec;
+#if CALCULATE_RECURSION
 		rec--;
 #endif
 		return;
 	}
 	if ((aa + 1) == bb)
 	{
+		//std::cout << "duo sort: " << aa << " , " << bb << std::endl;
 		sort(aa, bb);
-#ifdef RECURSION_CALC
-		if (rec > maxrec)
-			maxrec = rec;
+#if CALCULATE_RECURSION
 		rec--;
 #endif
 		return;
 	}
 	if ((aa + 2) == bb)
 	{
+		// std::cout << "triple sort: " << aa << " , " << bb << std::endl;
+
 		sort(aa, aa + 1, bb);
-#ifdef RECURSION_CALC
-		if (rec > maxrec)
-			maxrec = rec;
+#if CALCULATE_RECURSION
 		rec--;
 #endif
 		return;
@@ -206,81 +216,143 @@ void qsort(T *aa, T *bb)
 	sort(a, x, b);
 
 	T A = *a;
-	T X = *x;
 	T B = *b;
+	const T X = *x;
+	//std::cout << "quick sort: " << aa << " , " << bb << " : " << X << std::endl;
 
-	T *_a = x - 1;
-	T *b_ = x + 1;
-	do
+	T *_a = x;
+	T *b_ = x;
+	while (true)
 	{
-		while (a < _a and A < X)
+		while (a < _a)
 		{
-			++a;
-			A = *a;
-			while (A == X and a < _a)
+			while (A < X)
 			{
-				swap(a, _a);
-				--_a;
+				++a;
 				A = *a;
 			}
-		}
-		while (b_ < b and X < B)
-		{
-			--b;
-			B = *b;
-			while (B == X and b_ < b)
+			while (A == X)
 			{
-				swap(b, b_);
-				++b_;
+				--_a;
+				if (_a < a)
+				{
+					_a = a;
+					break;
+				}
+				//swap(a, _a);
+				A = *_a;
+				*_a = X;
+				*a = A;
+			}
+			if (X < A)
+				break;
+		}
+
+
+		while (b_ < b)
+		{
+			while (X < B)
+			{
+				--b;
 				B = *b;
 			}
+			while (B == X)
+			{
+				++b_;
+				if (b < b_)
+				{
+					b_ = b;
+					break;
+				}
+				//swap(b, b_);
+				B = *b_;
+				*b_ = X;
+				*b = B;
+			}
+			if (B < X)
+				break;
 		}
 
 		if (a < _a and b_ < b)
 		{
-			//			if (X < A and B < X)
+			assert(*_a == X);
+			assert(*b_ == X);
+			assert(X < A);
+			assert(B < X);
+			assert(*a == A);
+			assert(*b == B);
+			*b = A;
+			*a = B;
+			++a;
+			--b;
+			A = *a;
+			B = *b;
+		}
+		else if (a == _a and b_ < b)
+		{
+			assert(*a == X);
+			assert(*_a == X);
+			assert(*b == B);
+			assert(*b_ == X);
+			assert(B < X);
+			++b_;
+			if (b_ < b)
 			{
-				swap(a, b);
+				*a = B;
 				++a;
-				A = *a;
-				--b;
-				B = *b;
+				++_a;
+				B = *b_;
+				*b = B;
+				*b_ = X;
+			}
+			else
+			{
+				*a = B;
+				*b = X;
+				break;
 			}
 		}
-		else if (a <= _a and b_ == b)
+		else if (a < _a and b_ == b)
 		{
-			swap(_a, b_);
-			swap(a, b);
-			++a;
-			A = *a;
-			--b;
-			b_ = b;
-			//B = *b;
-		}
-		else if (a == _a and b_ <= b)
-		{
-			swap(b_, _a);
-			swap(b, a);
-			--b;
-			B = *b;
-			++a;
-			_a = a;
+			assert(*a == A);
+			assert(X < A);
+
+			assert(*b == X);
+			assert(*b_ == X);
+			--_a;
+			if (a < _a)
+			{
+				*b = A;
+				--b;
+				--b_;
+				A = *_a;
+				*a = A;
+				*_a = X;
+			}
+			else
+			{
+				*b = A;
+				*a = X;
+				break;
+			}
 		}
 		else
 		{
+			assert(b == b_);
+			assert(a == _a);
 			break;
 		}
-
 	}
-	while (a < _a or b_ < b);
+
+
+	assert(b == b_);
+	assert(a == _a);
 
 	if (aa < a)
-		qsort(aa, a);
+		qsort3(aa, a);
 	if (b < bb)
-		qsort(b, bb);
-#ifdef RECURSIONCALC
-	if (rec > maxrec)
-		maxrec = rec;
+		qsort3(b, bb);
+#if CALCULATE_RECURSION
 	rec--;
 #endif
 }
@@ -289,34 +361,16 @@ void qsort(T *aa, T *bb)
 
 int main()
 {
-//	for (int a = 1; a <= 3; ++a)
-//		for (int b = 1; b <= 3; ++b)
-//			for (int c = 1; c <= 3; ++c)
-//			{
-//				int abc[3];
-//				abc[0] = a;
-//				abc[1] = b;
-//				abc[2] = c;
-//				sort(&abc[0], &abc[1], &abc[2]);
-//				if (not test(&abc[0], &abc[2]))
-//				{
-//					//std::cout << "FAIL sort" << std::endl;
-//					//print(&abc[0], &abc[2]);
-//					//return 1;
-//				}
-//			}
-//	return 0;
 
-	const unsigned lim = 4;
+	const unsigned lim = 100000000;
 
-	typedef unsigned short T;
+	typedef unsigned long long T;
 	T *V = new T[lim];//
-	const T W[lim] = {2, 7, 3, 5};
+	const T W[lim] = {9, 8, 7, 6};
 	T *a = V;
 	T *b = V + lim - 1;
 
 	std::mt19937_64 generator(time(nullptr));
-
 
 	double S = 0;
 	const unsigned stat_size = 100;
@@ -325,9 +379,11 @@ int main()
 	{
 		for (int n = 0; n < lim; ++n)
 		{
-			V[n] =  generator()%10;
+			V[n] = generator();
+			//V[n] = W[n];
 		}
-		const T H = hash(V, b);
+		const T H = hash(a, b);
+		const auto sm = sum(a, b);
 
 		//std::cout << H << std::endl;
 		//print(0, lim - 1, V);
@@ -337,25 +393,31 @@ int main()
 			continue;
 		}
 
-
-		std::cout << "-------------------" << std::endl;
-		print(a, b);
+		std::cout << "test:" << s << " hash:" << H << " sum:" << sm
+				  << std::endl;
+		//print(a, b);
+#if CALCULATE_RECURSION
+		rec = 0;
+#endif
 		const auto start = std::chrono::system_clock::now();
-		qsort(a, b);
+		qsort3(a, b);
 		const auto duration = std::chrono::system_clock::now() - start;
-		if (not verify(a, b, H))
+		if (not verify(a, b, H) or sm != sum(a, b))
 		{
-			std::cout << "FAIL array" << std::endl;
+			std::cout << "FAIL array:" << s << std::endl;
+			//print(a, b);
 			return 1;
 		}
 		if (not test(a, b))
 		{
-			std::cout << "FAIL sort:" << maxrec << std::endl;
-			print(a, b);
+			std::cout << "FAIL sort:" << s << std::endl;
+			//print(a, b);
 			return 1;
 		}
 		stat[s] = std::chrono::duration_cast<std::chrono::milliseconds>(
 			duration).count();
+
+		std::cout << "PASS:" << stat[s] << " msec" << std::endl;
 		S += stat[s];
 	}
 
@@ -370,8 +432,9 @@ int main()
 		Z += (t * t);
 	}
 	std::cout << " SIGM=" << sqrt(Z / (1.0 * stat_size)) << std::endl;
+#if CALCULATE_RECURSION
 	std::cout << " MAXREC=" << maxrec << std::endl;
-
+#endif
 	delete[]V;
 	return 0;
 }
