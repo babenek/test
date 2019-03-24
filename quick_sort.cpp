@@ -81,7 +81,7 @@ bool test(const T *a, const T *b)
 }
 
 template<typename T>
-inline void swap(T *a, T *b)
+void swap(T *a, T *b)
 {
 	//std::cout << "swap: " << a << " <-> " << b << std::endl;
 	const T t = *a;
@@ -90,14 +90,14 @@ inline void swap(T *a, T *b)
 }
 
 template<typename T>
-inline void sort(T *a, T *b)
+void sort(T *a, T *b)
 {
 	if (*b < *a)
 		swap(a, b);
 }
 
 template<typename T>
-inline void sort(T *a, T *b, T *c)
+void sort(T *a, T *b, T *c)
 {
 	T A = *a;
 	T B = *b;
@@ -439,8 +439,17 @@ void qsort2(T *a, T *b)
 int main()
 {
 
-	const unsigned lim = 1000000000;
-	typedef short T;
+	const unsigned lim = 600000000;
+	typedef long long int T;
+	/*
+	const unsigned lim = 600000000;
+	typedef long long int T;
+	brutesearch
+	AVG=1362.21
+	SIGM=3.54484
+
+
+	*/
 	/*
 
 	10000000
@@ -491,7 +500,7 @@ int main()
 	SIGM=2.17633
 	*/
 	T *V = new T[lim];//
-	const T W[lim] = {9, 8, 7, 6};
+	//const T W[lim] = {9, 8, 7, 6};
 	T *a = V;
 	T *b = V + lim - 1;
 
@@ -500,59 +509,63 @@ int main()
 	double S = 0;
 	const unsigned stat_size = 100;
 	long long stat[stat_size];
-	for (unsigned s = 0; s < stat_size; ++s)
+
+	do
 	{
 		for (int n = 0; n < lim; ++n)
 		{
 			V[n] = generator();
-			//V[n] = W[n];
 		}
-
-		//std::cout << H << std::endl;
-		//print(0, lim - 1, V);
-		if (test(V, b))
-		{
-			//std::cout << "sorted?!?!?!" << std::endl;
-			continue;
-		}
-
-		//print(a, b);
-#if CALCULATE_RECURSION
-		rec = 0;
-#endif
 
 		const T H = hash(a, b);
 		const auto sm = sum(a, b);
+		//std::cout << H << std::endl;
+		if (test(V, b))
+		{
+			//std::cout << "already sorted?!?!?!" << std::endl;
+			continue;
+		}
 
-		std::cout << "test:" << s << " hash:" << H << " sum:" << sm
+		std::cout << "test:" << " hash:" << H << " sum:" << sm
 				  << std::endl;
 
 		qsort2(a, b);
 
-		const T X = *(b-1);
-
 		if (not verify(a, b, H) or sm != sum(a, b))
 		{
-			std::cout << "FAIL array:" << s << std::endl;
+			std::cout << "FAIL array" << std::endl;
 			//print(a, b);
 			return 1;
 		}
 		if (not test(a, b))
 		{
-			std::cout << "FAIL sort:" << s << std::endl;
+			std::cout << "FAIL sort" << std::endl;
 			//print(a, b);
 			return 1;
 		}
 
+	}
+	while (false);
+
+	for (unsigned s = 0; s < stat_size; ++s)
+	{
+
+#if CALCULATE_RECURSION
+		rec = 0;
+#endif
+
+		const T X = *(b - 1);
 
 		const auto start = std::chrono::system_clock::now();
 		const T *x = brute_search(a, b, X);
 		const auto duration = std::chrono::system_clock::now() - start;
+
 		if (nullptr == x or *x != X)
 		{
 			std::cout << X << " not found" << std::endl;
 			return 1;
 		}
+
 		stat[s] = std::chrono::duration_cast<std::chrono::milliseconds>(
 			duration).count();
 
