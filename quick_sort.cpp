@@ -18,6 +18,18 @@ static size_t maxrec = 0;
 
 
 template<typename T>
+const T *brute_search(const T *a, const T *b, const T X)
+{
+	for (const T *x = a; x <= b; ++x)
+	{
+		if (X == *x)
+			return x;
+	}
+	return nullptr;
+}
+
+
+template<typename T>
 void print(const T *a, const T *b)
 {
 	for (const T *n = a; n != b; ++n)
@@ -400,7 +412,7 @@ void qsort2(T *a, T *b)
 		while (*a < P)
 			++a;
 
-		while (P < *b )
+		while (P < *b)
 			--b;
 
 		if (a < b)
@@ -427,7 +439,8 @@ void qsort2(T *a, T *b)
 int main()
 {
 
-	const unsigned lim = 1000000;
+	const unsigned lim = 1000000000;
+	typedef short T;
 	/*
 
 	10000000
@@ -477,7 +490,6 @@ int main()
 	AVG=74.94
 	SIGM=2.17633
 	*/
-	typedef long long int T;
 	T *V = new T[lim];//
 	const T W[lim] = {9, 8, 7, 6};
 	T *a = V;
@@ -495,8 +507,6 @@ int main()
 			V[n] = generator();
 			//V[n] = W[n];
 		}
-		const T H = hash(a, b);
-		const auto sm = sum(a, b);
 
 		//std::cout << H << std::endl;
 		//print(0, lim - 1, V);
@@ -506,15 +516,21 @@ int main()
 			continue;
 		}
 
-		std::cout << "test:" << s << " hash:" << H << " sum:" << sm
-				  << std::endl;
 		//print(a, b);
 #if CALCULATE_RECURSION
 		rec = 0;
 #endif
-		const auto start = std::chrono::system_clock::now();
-		qsort3(a, b);
-		const auto duration = std::chrono::system_clock::now() - start;
+
+		const T H = hash(a, b);
+		const auto sm = sum(a, b);
+
+		std::cout << "test:" << s << " hash:" << H << " sum:" << sm
+				  << std::endl;
+
+		qsort2(a, b);
+
+		const T X = *(b-1);
+
 		if (not verify(a, b, H) or sm != sum(a, b))
 		{
 			std::cout << "FAIL array:" << s << std::endl;
@@ -525,6 +541,16 @@ int main()
 		{
 			std::cout << "FAIL sort:" << s << std::endl;
 			//print(a, b);
+			return 1;
+		}
+
+
+		const auto start = std::chrono::system_clock::now();
+		const T *x = brute_search(a, b, X);
+		const auto duration = std::chrono::system_clock::now() - start;
+		if (nullptr == x or *x != X)
+		{
+			std::cout << X << " not found" << std::endl;
 			return 1;
 		}
 		stat[s] = std::chrono::duration_cast<std::chrono::milliseconds>(
