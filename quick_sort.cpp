@@ -10,11 +10,54 @@
 
 #include <cassert>
 
-#define CALCULATE_RECURSION (0)
+#define CALCULATE_RECURSION (1)
 #if CALCULATE_RECURSION
 static size_t rec = 0;
 static size_t maxrec = 0;
 #endif
+
+
+template<typename T>
+const T *quick_search(const T *a, const T *b, const T X)
+{
+#if CALCULATE_RECURSION
+	rec++;
+	if (rec > maxrec)
+		maxrec = rec;
+#endif
+	const T *x = (a + ((b - a) >> 1));
+	T Y = *x;
+	if (X < Y)
+	{
+		if (a == x)
+		{
+			return nullptr;
+		}
+		else
+		{
+			return quick_search(a, x - 1, X);
+		}
+	}
+	else if (Y < X)
+	{
+		if (b == x)
+		{
+			return nullptr;
+		}
+
+		else
+		{
+			return quick_search(x + 1, b, X);
+		}
+	}
+	else// (X == Y)
+	{
+		return x;
+	}
+}
+
+//-----------------------------------------------
+
 
 
 template<typename T>
@@ -27,6 +70,9 @@ const T *brute_search(const T *a, const T *b, const T X)
 	}
 	return nullptr;
 }
+
+
+//---------------------------------------------
 
 
 template<typename T>
@@ -439,16 +485,20 @@ void qsort2(T *a, T *b)
 int main()
 {
 
-	const unsigned lim = 600000000;
-	typedef long long int T;
+	const unsigned lim = 1500000000;
+	typedef int T;
 	/*
 	const unsigned lim = 600000000;
 	typedef long long int T;
 	brutesearch
 	AVG=1362.21
 	SIGM=3.54484
-
-
+quick
+	const unsigned lim = 1500000000;
+	typedef int T;
+ AVG=0
+ SIGM=0
+ MAXREC=31
 	*/
 	/*
 
@@ -514,7 +564,8 @@ int main()
 	{
 		for (int n = 0; n < lim; ++n)
 		{
-			V[n] = generator();
+			auto X = generator();
+			V[n] = X;
 		}
 
 		const T H = hash(a, b);
@@ -526,8 +577,7 @@ int main()
 			continue;
 		}
 
-		std::cout << "test:" << " hash:" << H << " sum:" << sm
-				  << std::endl;
+		std::cout << "test:" << " hash:" << H << " sum:" << sm << std::endl;
 
 		qsort2(a, b);
 
@@ -547,6 +597,10 @@ int main()
 	}
 	while (false);
 
+#if CALCULATE_RECURSION
+	maxrec = rec;
+#endif
+
 	for (unsigned s = 0; s < stat_size; ++s)
 	{
 
@@ -554,10 +608,10 @@ int main()
 		rec = 0;
 #endif
 
-		const T X = *(b - 1);
+		const T X = *(b-3);
 
 		const auto start = std::chrono::system_clock::now();
-		const T *x = brute_search(a, b, X);
+		const T *x = quick_search(a, b, X);
 		const auto duration = std::chrono::system_clock::now() - start;
 
 		if (nullptr == x or *x != X)
