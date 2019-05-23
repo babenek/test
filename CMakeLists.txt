@@ -3,6 +3,6 @@ project(test)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(test hash.cpp prime.cpp)
+add_executable(test prime.cpp)
 
 set(CMAKE_CXX_FLAGS "-O0")
