@@ -4,60 +4,76 @@
 
 #include <iostream>
 
+#define PRIME 65536
+
 unsigned hash(char *string)
 {
 	if (nullptr == string)
 		return static_cast<unsigned >(-1);
 
 	unsigned result = 0;
+	unsigned mask = static_cast<unsigned >(-1);
 
-	while (true)
+	char s;
+	while ((s = *string))
 	{
-		const char s = *string;
-		if ('\0' == s)
-			break;
 		result <<= 5;
 		result ^= s;
-		string++;
-	};
+		mask <<= 2;
+		mask ^= s;
+		++string;
+	}
+	//	return 0xFFFF & (result ^ (result >> 16));
+	//return 0xFFFF & ((((result) % 3) << 15) | ((result) % 7) << 12 | (((result) % 31) << 7) | (((result) % 127) << 0));
+	result%=65521;
 
-	return 0x1FFFF &( result % 65537);
+	return (result);
 }
 
+int prime();
 
 int main()
 {
-	unsigned hash_table[65537] = {0,};
-	char s[5] = {0,};
-	for (char k = '0'; k < '3'; ++k)
+	//	prime();
+	//	return 0;
+	unsigned max = 0;
+	unsigned probes = 0;
+	unsigned hash_table[PRIME] = {0,};
+	char s[33] = "BAzhfdn+ denj shdj, cdd dsiud.))";
+	for (char k = 'a'; k <= 'z'; ++k)
 	{
-		s[0] = k;
+		s[28] = k;
 		for (char n = 'A'; n <= 'Z'; ++n)
 		{
-			s[1] = n;
-			for (char m = 'A'; m <= 'Z'; ++m)
+			s[29] = n;
+			for (char m = 'a'; m <= 'z'; ++m)
 			{
-				s[2] = m;
-				for (char l = 'A'; l <= 'Z'; ++l)
+				s[30] = m;
+				for (char l = '5'; l <= '7'; ++l)
 				{
-
-					s[3] = l;
-					hash_table[hash(s)]++;
-					std::cout << s << ":" << hash(s) << std::endl;
+					probes++;
+					s[31] = l;
+					const auto h = hash(s);
+					hash_table[h]++;
+					if (max < hash_table[h])
+						max = hash_table[h];
+					//std::cout << s << ":" << hash(s) << std::endl;
 				}
 			}
 		}
 	}
-
-
 	unsigned filled = 0;
-	for (unsigned n = 0; n < 65537; ++n)
+	for (unsigned n = 0; n < PRIME; ++n)
 	{
 		std::cout << n << ":" << hash_table[n] << std::endl;
 		if (hash_table[n])
 			filled++;
 	}
-	std::cout << filled / 65537.0 << std::endl;
+
+	std::cout << "probes:" << probes << std::endl;
+	std::cout << "max:" << max << std::endl;
+
+	std::cout << filled / static_cast<double>(PRIME) << std::endl;
 
 
 	return 0;
