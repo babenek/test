@@ -46,7 +46,7 @@ eratosfen(ULL primes[])
 }
 
 int
-main()
+main_prime()
 {
 	// 2^32 / 2^6 = 2^26
 	ULL *primes = new ULL[MAX_DB];
