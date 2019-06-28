@@ -6,7 +6,7 @@
 //! Issue: gcov discover compilator generated branches in cpp files.
 //! the branches may be not executed - so branch coverage percent is low.
 //! if you have to increase the coverage percent with gcov - try WUNDERWAFFE 
-//! (similar as VoksWagen test:)
+//! (similar as VolksWagen test:)
 
 //! macros definitions to create dummy branches
 #define bit0x01 if(n&0x01) {printf("\n true:%d",__COUNTER__ );} else {printf("\nfalse:%d",__COUNTER__ );}
