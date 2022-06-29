@@ -30,3 +30,4 @@ def main():
 if __name__ == "__main__":
     # test_func("42 is magic number")
     main()
+
