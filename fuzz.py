@@ -27,4 +27,6 @@ def main():
 
 
 if __name__ == "__main__":
+    # test_func('magic number is 42 parrots')
     main()
+
