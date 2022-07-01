@@ -44,6 +44,7 @@ while [ $uniq_corpus_size -ne $full_corpus_size ] || [ $uniq_corpus_count -ne $f
         -rss_limit_mb=6000 \
         -verbosity=1 \
         -merge=1 \
+        -merge_control_file=merge_control_file.$(date +%s).txt \
         corpus/ \
         corpus.tmp/ \
         ;
@@ -61,6 +62,14 @@ while [ $uniq_corpus_size -ne $full_corpus_size ] || [ $uniq_corpus_count -ne $f
         echo "something went wrong"
         exit 1
     fi
+    
+
+    # research how it reduces
+    exit 0
+
+
+
+
 done
 
 if [ $uniq_corpus_size -eq $full_corpus_size ] && [ $uniq_corpus_count -eq $full_corpus_count ]; then
