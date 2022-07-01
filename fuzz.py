@@ -15,14 +15,14 @@ def test_func(a: bytes) -> int:
 
 def fuzz_func(data):
     fdp = atheris.FuzzedDataProvider(data)
-    a = fdp.ConsumeString(3)
+    a = fdp.ConsumeBytes(3)
     test_func(a)
 
 
 def main():
     if not os.getenv('SKIP_ATHERIS_INSTRUMENT'):
         atheris.instrument_all()
-    atheris.Setup(sys.argv + ["-max_len=3", "-verbosity=1", "corpus/"], fuzz_func)
+    atheris.Setup(sys.argv + ["-max_len=3"], fuzz_func)
     atheris.Fuzz()
 
 

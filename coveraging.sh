@@ -3,8 +3,6 @@
 set -x
 set -e
 
-THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null 2>&1 && pwd )"
-
 export SKIP_ATHERIS_INSTRUMENT=1
 
 python -m coverage run \
