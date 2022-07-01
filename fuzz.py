@@ -1,28 +1,28 @@
 #!/usr/bin/env python
-import re
+import os
 import sys
 import atheris
 
 
-def test_func(a: str) -> float:
-    if "magic number is " == a[:16] and " parrots" == a[-8:]:
-        try:
-            n = int((a[-10:])[0:2])
-        except Exception:
-            return 0
-        return 1 / (42 - n)
+def test_func(a: bytes) -> int:
+    if 1<len(a):
+        if 0xFF == a[0] and 0xFE == a[1]:
+            return 1
+        elif 0xFE == a[0] and 0xFF == a[1]:
+            return -1
     return 0
 
 
 def fuzz_func(data):
     fdp = atheris.FuzzedDataProvider(data)
-    a = fdp.ConsumeString(256)
+    a = fdp.ConsumeString(3)
     test_func(a)
 
 
 def main():
-    atheris.instrument_all()
-    atheris.Setup(sys.argv + ["-max_len=258", "-verbosity=1", "corpus/"], fuzz_func)
+    if not os.getenv('SKIP_ATHERIS_INSTRUMENT'):
+        atheris.instrument_all()
+    atheris.Setup(sys.argv + ["-max_len=3", "-verbosity=1", "corpus/"], fuzz_func)
     atheris.Fuzz()
 
 
