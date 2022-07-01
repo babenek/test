@@ -3,7 +3,11 @@ import os
 import sys
 import atheris
 
+# with atheris.instrument_imports(enable_loader_override=False):
+#     import json
 
+
+@atheris.instrument_func
 def test_func(a: bytes) -> int:
     if 1<len(a):
         if 0xFF == a[0] and 0xFE == a[1]:
@@ -20,13 +24,12 @@ def fuzz_func(data):
 
 
 def main():
-    if not os.getenv('SKIP_ATHERIS_INSTRUMENT'):
-        atheris.instrument_all()
+#    if not os.getenv('SKIP_ATHERIS_INSTRUMENT'):
+#        atheris.instrument_all()
     atheris.Setup(sys.argv + ["-max_len=2"], fuzz_func)
     atheris.Fuzz()
 
 
 if __name__ == "__main__":
-    # test_func("magic number is 42 parrots")
     main()
 
