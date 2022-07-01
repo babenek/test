@@ -6,8 +6,8 @@ set -e
 
 python fuzz.py \
     -rss_limit_mb=6000 \
-    -seed=${seed} \
-    -atheris_runs=$(( 1024000 + $(ls corpus | wc -l) )) \
+    -seed=$(date +%s) \
+    -atheris_runs=$(( 1234567890 + $(ls corpus | wc -l) )) \
     -verbosity=1 \
     corpus/ \
     ;
