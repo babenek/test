@@ -5,10 +5,9 @@ import atheris
 
 
 def test_func(a: str) -> float:
-
-    if a[-16:] == " is magic number":
+    if "magic number is " == a[:16] and " parrots" == a[-8:]:
         try:
-            n = int((a[-18:])[0:2])
+            n = int((a[-10:])[0:2])
         except Exception:
             return 0
         return 1 / (42 - n)
@@ -28,6 +27,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # test_func("42 is magic number")
+    # test_func("magic number is 42 parrots")
     main()
 
