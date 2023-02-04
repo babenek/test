@@ -8,10 +8,10 @@ on:
   pull_request:
     branches: [ main ]
   release:
-    types: [ created ]
+    types: [ released ]
 
 jobs:
-  deploy:
+  test:
 
     runs-on: ubuntu-latest
 
