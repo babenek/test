@@ -21,10 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import base64
-import contextlib
-import json
-import math
+import random
 import statistics
 import sys
 import time
@@ -35,91 +32,38 @@ LEN = 100
 SIZE = 1 << 20
 
 
-def test_func(i):
-    return 42 == math.sqrt(i)
-
-
-def perf_test_any_return(data):
-    if any(test_func(i) for i in data):
-        return True
-    return False
-
-
-def perf_test_for_return(data):
-    for i in data:
-        if test_func(i):
-            return True
-    return False
-
-
-def perf_test_any_break(data):
-    result = False
-    if any(test_func(i) for i in data):
-        result = True
-    return result
-
-
-def perf_test_for_break(data):
-    result = False
-    for i in data:
-        if test_func(i):
-            result = True
-            break
-    return result
-
-
-class TestStorage:
+class PlainProp:
     def __init__(self):
-        self.test_set = set([str(i) for i in range(1000, 2000)])
-        self.test_set_len = len(self.test_set)
+        self.test_property = random.randint(-1000, 1000)
+
+
+class CacheProp:
+    def __init__(self):
+        self.__test_property = random.randint(-1000, 1000)
 
     @cached_property
-    def set_len(self):
-        return self.test_set_len
+    def test_property(self):
+        return self.__test_property
 
 
-def perf_test_for_len(storage: TestStorage):
-    n = 2222
-    while n < 65536:
-        if n == len(storage.test_set):
-            raise RuntimeError("tada")
-        n += 1
+class FuncProp:
+    def __init__(self):
+        self.test_property = random.randint(-1000, 1000)
+
+    @property
+    def test_property(self):
+        return self.__test_property
+
+    @test_property.setter
+    def test_property(self, x):
+        self.__test_property = x
 
 
-def perf_test_for_cached_property(storage: TestStorage):
-    n = 2222
-    while n < 65536:
-        if n == storage.test_set_len:
-            raise RuntimeError("tada")
-        n += 1
-
-
-def perf_test_raise(data):
-    decoded = base64.b64decode(data)
-    structure = json.loads(decoded)
-    if "x" in structure:
-        return True
-    return False
-
-
-def perf_test_try(data):
-    x = 0
-    for n in range(len(data) >> 1):
-        try:
-            if perf_test_raise(data[:-n]):
-                x += 1
-        except Exception:
-            pass
-    pass
-
-
-def perf_test_contextlib(data):
-    x = 0
-    for n in range(len(data) >> 1):
-        with contextlib.suppress(Exception):
-            if perf_test_raise(data[:-n]):
-                x += 1
-    pass
+def get_property(data):
+    result = 0
+    for i in data:
+        result += i.test_property
+    return result
 
 
 def perf_test(func, data):
@@ -133,32 +77,23 @@ def perf_test(func, data):
 
 def main() -> int:
     start_time = time.time()
-    test_dict = {"x": [i for i in range(500)]}
-    data = base64.b64encode((json.dumps(test_dict) + " " * 1000).encode())
-    perf_test(perf_test_try, data)
-    perf_test(perf_test_contextlib, data)
 
-    # data = [random.randint(0, 1 << 32) for i in range(SIZE)]
-    # perf_test(perf_test_any_return, data)
-    # perf_test(perf_test_for_return, data)
-    # perf_test(perf_test_any_break, data)
-    # perf_test(perf_test_for_break, data)
-    # <function perf_test_any_return at 0x7f068cfeb910> Average = 0.11843196153640748 Deviation = 0.0015744642316259244
-    # <function perf_test_for_return at 0x7f068cfeba30> Average = 0.10853729486465453 Deviation = 0.0006816465047585867
-    # <function perf_test_any_break at 0x7f068cfebc70> Average = 0.11445562362670898 Deviation = 0.0023068645681618496
-    # <function perf_test_for_break at 0x7f068d0349d0> Average = 0.10444020032882691 Deviation = 0.0019803037085437195
-    # Total time: 45.11462354660034 SIZE=1048576
-
-    # storage = TestStorage()
-    # perf_test(perf_test_for_len, storage)
-    # perf_test(perf_test_for_cached_property, storage)
-    # <function perf_test_for_len at 0x7f6c6a2620e0> Average = 0.0037006020545959474 Deviation = 9.439964342071108e-05
-    # <function perf_test_for_cached_property at 0x7f6c6a262290> Average = 0.0025658631324768067 Deviation = 6.47348496447131e-05
-    # Total time: 0.6272745132446289 SIZE=1048576
+    data_plain = [PlainProp()] * SIZE
+    perf_test(get_property, data_plain)
+    data_cached = [CacheProp()] * SIZE
+    perf_test(get_property, data_cached)
+    data_func = [FuncProp()] * SIZE
+    perf_test(get_property, data_func)
 
     print(f"Total time: {time.time() - start_time} SIZE={SIZE}")
     return 0
 
+#<function get_property at 0x7f8f8968fd90> Average = 0.030204448699951172 Deviation = 0.0009201579105806786
+# <function get_property at 0x7f8f8968fd90> Average = 0.030084915161132812 Deviation = 0.0004034880426772356
+# <function get_property at 0x7f8f8968fd90> Average = 0.05708320379257202 Deviation = 0.0005566302309871567
+# Total time: 11.743269443511963 SIZE=1048576
+#
+# Process finished with exit code 0
 
 
 
