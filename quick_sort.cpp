@@ -552,7 +552,8 @@ quick
 	T *V = new T[lim];//
 	//const T W[lim] = {9, 8, 7, 6};
 	T *a = V;
-	T *b = V + lim - 1;
+	T *b = V + lim;
+	// test password 'ndU6t2fe6^2'
 
 	std::mt19937_64 generator(time(nullptr));
 	assert(0);
