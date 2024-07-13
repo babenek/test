@@ -33,6 +33,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
-    - name: ApplicationTest with pytest
+    - name: path test
       run: |
         python path_test.py
