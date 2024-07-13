@@ -1,76 +1,76 @@
-//
-// Created by user on 10.05.19.
-//
 
 #include <iostream>
+#include <string>
+#include <stdint.h>
 
-typedef unsigned long long ULL;
+uint8_t *db;
+/*
+ * 0 - not prime
+ * 1 - prime or not checked
+ */
 
-const ULL MAX_NUMBER = 1ull << 33;
+const uint64_t maxNumber = 0xFFFFFFFF;
+//const uint64_t maxNumber = 1000; // 168 numbers up to 1000
+//const uint64_t maxNumber = 7919; // 1000 numbers up to 7919
+//const uint64_t maxNumber = 104729; // 10000 numbers up to 104729
+//const uint64_t maxNumber = 1000000;
 
-const ULL MAX_DB = MAX_NUMBER>>7;// except 2  and  all odd  numbers
+//const uint32_t bitCount = 2 << 28;
+const uint32_t bitCount = (maxNumber >> 4) + ((maxNumber % 16) ? 1 : 0);
 
-inline void
-clean(ULL primes[])
+inline uint32_t index(const uint32_t n)
 {
-	for (unsigned n = 0; n < MAX_DB; ++n)
-		primes[n] = 0;
+	return (n >> 4);
+}
+inline uint8_t mask(const uint32_t n)
+{
+	return (1 << ((0xF & n) >> 1));
 }
 
-inline bool
-prime(ULL number, ULL *primes)
+inline bool check(const uint64_t n)
 {
-	return (not(primes[number >> 7] & (1ull << (0x3F & (number >> 1)))));
+	return (mask(n) & db[index(n)]);
 }
 
-inline void
-set(ULL number, ULL primes[])
+int main()
 {
-	primes[number >> 7] |= (1ull << (0x3F & (number >> 1)));
-}
+	unsigned c = 1;
+	std::cout << "2" << "\n"; // the first prime number!
 
-void
-eratosfen(ULL primes[])
-{
-	clean(primes);
-
-	for (ULL n = 3; n < MAX_NUMBER; n += 2)
+	db = new uint8_t[bitCount];
+	for (uint32_t n = 0; n < bitCount; n++)
 	{
-		if (not prime(n, primes))
-			continue;
-		const ULL d = n << 1;
-		for (ULL m = n + d; m < (1ull << 32); m += d)
-			set(m, primes);
-
+		db[n] = 0xFF;
 	}
-}
 
-int
-main_prime()
-{
-	// 2^32 / 2^6 = 2^26
-	ULL *primes = new ULL[MAX_DB];
-
-	eratosfen(primes);
-	ULL s = 1; // 2 - is the prime
-	ULL mask = ~(s - 1);
-	for (ULL n = 3; n < MAX_NUMBER; n += 2)
+	for (uint64_t n = 3; n <= maxNumber; n += 2)
 	{
-		if (0 != (n & mask) and prime(n, primes))
+		if (check(n))
 		{
-			for (ULL m = n - 2; m > 3; m -= 2)
+			c++;
+			//if (0 == (c % 1000000))
+			std::cout << n  << "\n";
+			// it is prime. do all mux
+
+			uint64_t MMax = maxNumber / n;
+			if (not (MMax & 0x1))
+				MMax--;
+
+			for (uint64_t m = MMax; m >= n; m -= 2)
 			{
-				if (prime(m, primes))
+				if (check(m))
 				{
-					std::cout << std::showbase << std::hex << m << std::endl;
-					break;
+					const uint64_t q = m * n;
+					const uint32_t im = index(q);
+					const uint8_t bm = mask(q);
+					db[im] &= (0xFF ^ bm);
 				}
 			}
-			s <<= 1;
-			mask = ~(s - 1);
 		}
 	}
 
-	delete[]primes;
-	return 0;
+	//std::cout << std::endl << c << " done!" << std::endl;
+
+	delete[] db;
 }
+
