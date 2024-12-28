@@ -19,6 +19,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         echo $GITHUB_EVENT_PATH
+        cat $GITHUB_EVENT_PATH
         curl -X PATCH \
           -H "Authorization: Bearer $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github+json" \
