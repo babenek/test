@@ -30,11 +30,11 @@ jobs:
     steps:
 
     - name: test draft
-      if: ${{ github.event.pull_request.draft == 'false' }}
+      if: ${{ github.event.pull_request.draft == true }}
       run: echo "The draft"
 
     - name: test fair
-      if: ${{ github.event.pull_request.draft == 'true' }}
+      if: ${{ github.event.pull_request.draft == false }}
       run: echo "The fair"
       
     - name: test
