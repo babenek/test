@@ -2,8 +2,7 @@ name: Test
 
 on:
   pull_request:
-    types:
-      - opened
+    branches: [ main ]
 
 jobs:
 
@@ -37,5 +36,8 @@ jobs:
     - name: test fair
       if: github.event.pull_request.draft == 'true'
       run: echo "The fair"
+      
+    - name: test
+      run: echo ${{ github.event.pull_request.draft }}      
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
